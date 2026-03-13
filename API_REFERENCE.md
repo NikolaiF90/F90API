@@ -100,8 +100,8 @@ Handles all three AID input formats:
 { original: "> You pick up the sword.", clean: "pick up the sword", prepend: "> You" }
 
 // SAY
-// Input: "> You say, "/loadout add/Fuzheng"."
-{ original: "> You say, \"/loadout add/Fuzheng\".", clean: "/loadout add/Fuzheng", prepend: "> You say," }
+// Input: "> You say, "/loadout add/John"."
+{ original: "> You say, \"/loadout add/John\".", clean: "/loadout add/John", prepend: "> You say," }
 
 // STORY
 // Input: "The kingdom falls at dawn."
