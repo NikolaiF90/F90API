@@ -20,11 +20,11 @@ by PrinceF90
 
 ## What is F90 API?
 
-F90 API is a shared scripting foundation for AI Dungeon. It provides common utilities that every script needs - character management, text manipulation, notifications, story card access - so developers stop reimplementing the same logic and world makers stop wrestling with compatibility.
+F90 API is a shared scripting foundation for AI Dungeon. It provides common utilities that every script needs: character management, text manipulation, notifications, story card access, so developers stop reimplementing the same logic and world makers stop wrestling with compatibility.
 
-Any script built on F90 API speaks the same language as every other script built on F90 API. Drop two compatible scripts into the same adventure, register them, and they run together without conflict - no merging, no copy-pasting, no guessing.
+Any script built on F90 API speaks the same language as every other script built on F90 API. Drop two compatible scripts into the same adventure, register them, and they run together without conflict. No merging, no copy-pasting, no guessing.
 
-F90 API is battle-tested. Every method was extracted from real, working scripts - [CSMS](https://github.com/NikolaiF90/AIDCharacterSheetandMechanicSystem) and Loadout - before being formally added. Nothing speculative, nothing designed upfront.
+F90 API is battle-tested. Every method was extracted from real, working scripts - [CSMS](https://github.com/NikolaiF90/AIDCharacterSheetandMechanicSystem) and Loadout before being formally added. Nothing speculative, nothing designed upfront.
 
 ---
 
@@ -121,17 +121,17 @@ Click **Play**. Your scripts are now running together.
 
 ## Why
 
-If you play AI Dungeon with scripts, you've probably wanted to run two scripts together - CSMS and InnerSelf, or Loadout and something else - only to find they weren't designed to coexist. Running them both means editing code you didn't write, hoping nothing breaks, and ending up with a merged version nobody else can help you with. The original developer can't support your modified copy. You're on your own.
+If you play AI Dungeon with scripts, you've probably wanted to run two scripts together. CSMS and InnerSelf, or Loadout and something else. Only to find they weren't designed to coexist. Running them both means editing code you didn't write, hoping nothing breaks, and ending up with a merged version nobody else can help you with. The original developer can't support your modified copy. You're on your own.
 
 So most people don't bother. They wait for someone to release a pre-merged version that may never come. Or they just pick one script and leave the rest behind.
 
 **F90 API removes that problem entirely.**
 
-Scripts that build on F90 API don't need to be merged. They register themselves and run side by side - each one untouched, each one still supported by its original developer. If something breaks in CSMS, you ask the CSMS developer. If something breaks in Loadout, you ask the Loadout developer. Nobody's guessing what the other person did to their code.
+Scripts that build on F90 API don't need to be merged. They register themselves and run side by side. Each one untouched, each one still supported by its original developer. If something breaks in CSMS, you ask the CSMS developer. If something breaks in Loadout, you ask the Loadout developer. Nobody's guessing what the other person did to their code.
 
 When a developer releases an update, you just drop the new file in. No re-merging, no re-editing, no wondering what changed. Your other scripts keep running exactly as before.
 
-For developers, it means no more reimplementing the same logic every project. Character registries, caller detection, notification systems - write it once in F90 API, trust it everywhere. And when AID changes something under the hood - say a variable gets renamed or a global behaves differently - you fix it once in F90 API and every script built on it is fixed automatically. No hunting down the same line scattered across ten files.
+For developers, it means no more reimplementing the same logic every project. Character registries, caller detection, notification systems - write it once in F90 API, trust it everywhere. And when AID changes something under the hood say a variable gets renamed or a global behaves differently. You fix it once in F90 API and every script built on it is fixed automatically. No hunting down the same line scattered across ten files.
 
 For world makers, it means combining scripts is no longer a technical challenge. It's a few lines at the bottom of a file.
 
@@ -160,7 +160,7 @@ Common AID scripting tools available to any script:
 - Input parsing - handles DO, SAY, and STORY formats
 
 ### Module Runtime
-F90 API owns hook execution. Scripts register themselves as modules - F90 calls them in the right order, at the right time, and logs failures without breaking other modules.
+F90 API owns hook execution. Scripts register themselves as modules. F90 calls them in the right order, at the right time, and logs failures without breaking other modules.
 
 ```javascript
 F90.registerModule("CSMS", CSMS);
@@ -180,7 +180,7 @@ Modules execute in registration order by default. If a specific module needs to 
 F90.registerModule("YourModule", YourModule, { context: 0, output: 99 });
 ```
 
-Failures are caught and logged - a broken module never takes down the others.
+Failures are caught and logged. A broken module never takes down the others.
 
 ---
 
@@ -246,7 +246,7 @@ Then replace the contents of your Input, Context, and Output tabs with the code 
 
 ## Contributing
 
-F90 API is open to contributions from the AID scripting community. If you have a utility that every script needs, a fix for an AID quirk, or a pattern worth standardising - open a pull request or reach out on the AI Dungeon Discord.
+F90 API is open to contributions from the AID scripting community. If you have a utility that every script needs, a fix for an AID quirk, or a pattern worth standardising, open a pull request or reach out on the AI Dungeon Discord.
 
 Contributors are credited by name in this repository.
 
@@ -261,7 +261,7 @@ Contributors are credited by name in this repository.
 
 ## Credits
 
-Hook terminology in this documentation follows the convention established by **LewdLeah** (InnerSelf, Auto-Cards), whose scripts introduced the pattern to the AID modding community.
+Hook terminology in this documentation follows the convention established by **LewdLeah** ([InnerSelf](https://github.com/LewdLeah/Inner-Self/tree/main), Auto-Cards), whose scripts introduced the pattern to the AID modding community.
 
 ---
 
