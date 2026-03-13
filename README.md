@@ -67,7 +67,7 @@ That's all a world maker needs to know.
 
 ## Getting Started
 
-### 1. Copy `F90_API_library.js` into your Library tab
+### 1. Copy [F90_API_library.js](https://github.com/NikolaiF90/F90API/blob/main/F90_API_library.js) into your Library tab
 
 ### 2. Add your scripts inside library.js
 
