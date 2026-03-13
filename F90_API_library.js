@@ -88,6 +88,10 @@ F90.getCallerCharacter = function()
   return state.f90.characters.find(c => c.isPlayer) || null;
 }
 
+/*
+  TEXT
+*/
+
 // Appends content to the current text.
 F90.addToText = function(content)
 {
@@ -104,6 +108,36 @@ F90.setText = function(content)
 F90.addToMemory = function(content)
 {
   state.memory.frontMemory = (state.memory.frontMemory || "") + "\n\n" + content;
+}
+
+// Parses AID's player input into structured parts.
+// Handles DO, SAY, and STORY input formats.
+// DO:    "> You action."        → { original, clean: "action",    prepend: "> You" }
+// SAY:   "> You say, "text."   → { original, clean: "text",      prepend: "> You say," }
+// STORY: "text."                → { original, clean: "text",      prepend: null }
+F90.parseInput = function()
+{
+  const original = F90.getTextSnapshot();
+
+  // SAY/multiplayer SAY — "> Name verb, "quoted content""
+  const sayMatch = original.match(/^>\s*\S+\s+\w+,\s*"(.+?)"\.?\s*$/);
+  if (sayMatch)
+  {
+    const prepend = original.match(/^(>\s*\S+\s+\w+,)/)[1].trim();
+    return { original, clean: sayMatch[1].trim(), prepend };
+  }
+
+  // DO/multiplayer DO — "> Name action."
+  const doMatch = original.match(/^>\s*(\S+)\s+(.+?)\.?\s*$/);
+  if (doMatch)
+  {
+    const prepend = `> ${doMatch[1]}`.trim();
+    return { original, clean: doMatch[2].trim(), prepend };
+  }
+
+  // STORY — no prepend, just strip trailing punctuation
+  const clean = original.replace(/[.!?]+$/, "").trim();
+  return { original, clean, prepend: null };
 }
 
 /*
@@ -197,8 +231,11 @@ F90.deleteCard = function(title)
   return true;
 }
 
-// F90.getCardsByTitle(title) — returns array of cards matching title. (not yet implemented)
-// F90.getCardsByType(type)   — returns array of cards matching type.  (not yet implemented)
+// Returns all story cards matching the given type. Case-sensitive.
+F90.getCardsByType = function(type)
+{
+  return storyCards.filter(c => c.type === type);
+}
 
 // ============================================
 // F90 API - Module Runtime
@@ -213,7 +250,7 @@ F90.registerModule = function(name, fn, priority)
 {
   F90._modules.push({
     name:       name,
-    fn:        fn,
+    fn:         fn,
     priority:   priority || {},
     order:      F90._modules.length,
   });
