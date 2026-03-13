@@ -119,6 +119,8 @@ Click **Play**. Your scripts are now running together.
 
 ---
 
+![F90 API COVER ART](https://github.com/NikolaiF90/F90API/blob/main/Cover_Art_F90API.png)
+
 ## Why
 
 If you play AI Dungeon with scripts, you've probably wanted to run two scripts together. CSMS and InnerSelf, or Loadout and something else. Only to find they weren't designed to coexist. Running them both means editing code you didn't write, hoping nothing breaks, and ending up with a merged version nobody else can help you with. The original developer can't support your modified copy. You're on your own.
