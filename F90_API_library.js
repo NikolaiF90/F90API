@@ -1,333 +1,299 @@
-// ============================================
-// F90 API - Core Utilities
-// v1.0.0 by PrinceF90
-// Copy everything from here to END OF F90 API
-// and paste at the top of your library
-// ============================================
+# F90 API Reference
 
-const F90 = {};
+All methods live under the global `F90` object. Available in any hook — Input, Context, or Output.
 
-// Names that should never be treated as valid characters.
-const F90_CONFIG =
+---
+
+## Table of Contents
+
+- [Text](#text)
+- [Input Parsing](#input-parsing)
+- [Characters](#characters)
+- [Story Cards](#story-cards)
+- [Notifications](#notifications)
+- [Module Runtime](#module-runtime)
+
+---
+
+## Text
+
+### `F90.captureText()`
+Captures the raw unmodified text at the moment of the call. Automatically called by `F90.run()` at the start of the input hook — manual calls are not needed when using the module runtime.
+
+| | |
+|---|---|
+| **Parameters** | none |
+| **Returns** | void |
+
+> **Tip:** In the input hook, `text` is the player's raw input. In context, it is the context window. In output, it is the AI's generated response. Capturing early preserves the original before anything mutates it.
+
+---
+
+### `F90.getTextSnapshot()`
+Returns the text captured by the most recent `F90.captureText()` call.
+
+| | |
+|---|---|
+| **Parameters** | none |
+| **Returns** | `string` — captured text, or `""` if nothing has been captured yet |
+
+---
+
+### `F90.addToText(content)`
+Appends content to the current text.
+
+| | |
+|---|---|
+| **Parameters** | `content` `string` |
+| **Returns** | void |
+
+---
+
+### `F90.setText(content)`
+Replaces the current text entirely.
+
+| | |
+|---|---|
+| **Parameters** | `content` `string` |
+| **Returns** | void |
+
+---
+
+### `F90.addToMemory(content)`
+Appends content to `frontMemory` for AI context injection.
+
+| | |
+|---|---|
+| **Parameters** | `content` `string` |
+| **Returns** | void |
+
+---
+
+## Input Parsing
+
+### `F90.parseInput()`
+Parses AID's player input into structured parts. Reads from the current text snapshot automatically.
+
+Handles all three AID input formats:
+- **DO** — `> You action here.`
+- **SAY** — `> You say, "whatever you typed."`
+- **STORY** — `whatever you typed.` (no prepend)
+
+| | |
+|---|---|
+| **Parameters** | none |
+| **Returns** | `object` — `{ original, clean, prepend }` |
+
+**Return shape:**
+```javascript
 {
-  BANNED_NAMES: ["you", "adventurer"],
+  original: string,  // raw unmodified input
+  clean:    string,  // input stripped of prepend and punctuation, ready to use
+  prepend:  string | null  // what was stripped (null for STORY)
 }
+```
 
-// Initializes F90 API state. Owns the character registry.
-// Called automatically at library load — no manual init needed.
-function initF90()
-{
-  if (!state.f90) state.f90 = { characters: [] };
-}
+**Examples:**
+```javascript
+// DO
+// Input: "> You pick up the sword."
+{ original: "> You pick up the sword.", clean: "pick up the sword", prepend: "> You" }
 
-// Self-initializes on load.
-initF90();
+// SAY
+// Input: "> You say, "/loadout add/Fuzheng"."
+{ original: "> You say, \"/loadout add/Fuzheng\".", clean: "/loadout add/Fuzheng", prepend: "> You say," }
 
-// Captures raw unmodified text. Call at the top of each hook before anything mutates text.
-F90.captureText = function()
-{
-  state.f90._textSnapshot = text;
-}
+// STORY
+// Input: "The kingdom falls at dawn."
+{ original: "The kingdom falls at dawn.", clean: "The kingdom falls at dawn", prepend: null }
+```
 
-// Returns the captured raw text for the current hook.
-F90.getTextSnapshot = function()
-{
-  return state.f90._textSnapshot || "";
-}
+> ⚠️ **Untested** — pending real usage in CSMS.
 
-// Returns true if the current session is multiplayer.
-F90.isMultiplayer = function()
-{
-  if (!info.characters || info.characters.length <= 1) return false;
+---
 
-  for (const name of info.characters)
-  {
-    if (!name || name.trim() === "") continue;
-    if (F90_CONFIG.BANNED_NAMES.some(b => b.toLowerCase() === name.toLowerCase())) continue;
-    if (!F90.findCharacter(name)) continue;
-    
-    return true;
-  }
+## Characters
 
-  return false;
-}
+### `F90.createCharacter(character)`
+Adds a character to F90's registry. The first character created is automatically marked as the player.
 
-// Returns a character by name. Case-insensitive.
-F90.findCharacter = function(name)
-{
-  return state.f90.characters.find(c => c.name.toLowerCase() === name.toLowerCase()) || null;
-}
+| | |
+|---|---|
+| **Parameters** | `character` `object` — must include a `name` property. All other properties are caller-defined. |
+| **Returns** | `boolean` — `true` on success, `false` if name is missing or character already exists |
 
-// Returns the caller name as a clean string by parsing AID's "> Name" input format.
-// Returns whatever follows ">". Caller is responsible for handling "You", "I", or invalid names.
-F90.getCaller = function()
-{
-  const input = F90.getTextSnapshot();
-  const match = input.match(/>\s*(\S+)/);
-  
-  return match ? match[1].trim() : null;
-}
+**Example:**
+```javascript
+F90.createCharacter({ name: "Fuzheng", hp: 100 });
+```
 
-// Returns the full character object of the active caller.
-F90.getCallerCharacter = function()
-{
-  const name = F90.getCaller();
+---
 
-  if (!name)
-  {
-    log("F90 > Caller not found.");
-    return null;
-  }
+### `F90.deleteCharacter(name)`
+Removes a character from F90's registry by name.
 
-  if (!F90_CONFIG.BANNED_NAMES.some(b => b.toLowerCase() === name.toLowerCase()))
-  {
-    return F90.findCharacter(name);
-  }
+| | |
+|---|---|
+| **Parameters** | `name` `string` |
+| **Returns** | `boolean` — `true` on success, `false` if not found |
 
-  // Banned name means singleplayer — fall back to player character
-  return state.f90.characters.find(c => c.isPlayer) || null;
-}
+---
 
-/*
-  TEXT
-*/
+### `F90.findCharacter(name)`
+Finds a character in F90's registry by name. Case-insensitive.
 
-// Appends content to the current text.
-F90.addToText = function(content)
-{
-  text = text.trimEnd() + content;
-}
+| | |
+|---|---|
+| **Parameters** | `name` `string` |
+| **Returns** | `object` — character object, or `null` if not found |
 
-// Replaces the current text entirely.
-F90.setText = function(content)
-{
-  text = content;
-}
+---
 
-// Appends content to frontMemory for AI context injection.
-F90.addToMemory = function(content)
-{
-  state.memory.frontMemory = (state.memory.frontMemory || "") + "\n\n" + content;
-}
+### `F90.getCaller()`
+Parses AID's `> Name` input format and returns the caller's name as a plain string.
 
-// Parses AID's player input into structured parts.
-// Handles DO, SAY, and STORY input formats.
-// DO:    "> You action."        → { original, clean: "action",    prepend: "> You" }
-// SAY:   "> You say, "text."   → { original, clean: "text",      prepend: "> You say," }
-// STORY: "text."                → { original, clean: "text",      prepend: null }
-F90.parseInput = function()
-{
-  const original = F90.getTextSnapshot();
+Returns whatever follows `>`. Does not resolve banned names or validate against the registry — that is the caller's responsibility.
 
-  // SAY/multiplayer SAY — "> Name verb, "quoted content""
-  const sayMatch = original.match(/^>\s*\S+\s+\w+,\s*"(.+?)"\.?\s*$/);
-  if (sayMatch)
-  {
-    const prepend = original.match(/^(>\s*\S+\s+\w+,)/)[1].trim();
-    return { original, clean: sayMatch[1].trim(), prepend };
-  }
+| | |
+|---|---|
+| **Parameters** | none |
+| **Returns** | `string` — caller name, or `null` if no match |
 
-  // DO/multiplayer DO — "> Name action."
-  const doMatch = original.match(/^>\s*(\S+)\s+(.+?)\.?\s*$/);
-  if (doMatch)
-  {
-    const prepend = `> ${doMatch[1]}`.trim();
-    return { original, clean: doMatch[2].trim(), prepend };
-  }
+> **Tip:** In singleplayer, AID prepends `> You`. In multiplayer, it prepends `> CharacterName`. `getCaller()` returns whichever name follows `>` without branching.
 
-  // STORY — no prepend, just strip trailing punctuation
-  const clean = original.replace(/[.!?]+$/, "").trim();
-  return { original, clean, prepend: null };
-}
+---
 
-/*
-  NOTIFICATION
-*/
+### `F90.getCallerCharacter()`
+Returns the full character object of the active caller.
 
-// Queues a message to be shown to the player at the end of the output hook.
-F90.notify = function(message)
-{
-  if (!state.f90._notifyQueue) state.f90._notifyQueue = [];
-  state.f90._notifyQueue.push(message);
-}
+In singleplayer, `> You` is a banned name — falls back to the player character automatically. In multiplayer, resolves the caller by name against the registry.
 
-// Flushes all queued notifications into text.
-// Call at the end of the output hook, before modifier.
-F90.flushNotify = function()
-{
-  if (!state.f90._notifyQueue || state.f90._notifyQueue.length === 0) return;
+| | |
+|---|---|
+| **Parameters** | none |
+| **Returns** | `object` — character object, or `null` if not found |
 
-  const messages = state.f90._notifyQueue.map(m => m).join("\n");
-  text = `[${messages}]\n\n` + text;
-  state.f90._notifyQueue = [];
-}
+---
 
-/*
-  CHARACTER
-*/
+### `F90.isMultiplayer()`
+Returns `true` if the current session has more than one valid, registered, non-banned character in `info.characters`.
 
-// Creates a character in F90's registry.
-// Caller defines the character object shape — F90 only requires a name.
-// First character created is always the player.
-// Returns true on success, false on failure.
-F90.createCharacter = function(character)
-{
-  if (!character || !character.name)
-  {
-    log("F90 > createCharacter: character object must have a name.");
-    return false;
-  }
+| | |
+|---|---|
+| **Parameters** | none |
+| **Returns** | `boolean` |
 
-  if (F90.findCharacter(character.name))
-  {
-    log(`F90 > createCharacter: ${character.name} already exists.`);
-    return false;
-  }
+---
 
-  if (state.f90.characters.length === 0) character.isPlayer = true;
+## Story Cards
 
-  state.f90.characters.push(character);
-  log(`F90 > Character "${character.name}" created.`);
+### `F90.findCard(title)`
+Returns a story card by exact title match.
 
-  return true;
-}
+| | |
+|---|---|
+| **Parameters** | `title` `string` — case-sensitive |
+| **Returns** | `object` — story card object, or `null` if not found |
 
-// Deletes a character from F90's registry by name.
-// Returns true on success, false on failure.
-F90.deleteCharacter = function(name)
-{
-  const idx = state.f90.characters.findIndex(c => c.name.toLowerCase() === name.toLowerCase());
+---
 
-  if (idx === -1)
-  {
-    log(`F90 > deleteCharacter: ${name} not found.`);
-    return false;
-  }
+### `F90.deleteCard(title)`
+Deletes a story card by exact title match.
 
-  state.f90.characters.splice(idx, 1);
-  log(`F90 > deleteCharacter: Character "${name}" deleted.`);
+| | |
+|---|---|
+| **Parameters** | `title` `string` — case-sensitive |
+| **Returns** | `boolean` — `true` on success, `false` if not found |
 
-  return true;
-}
+---
 
-/*
-  STORY CARDS
-*/
+### `F90.getCardsByType(type)`
+Returns all story cards matching the given type.
 
-// Returns a story card by exact title match. Case-sensitive.
-F90.findCard = function(title)
-{
-  return storyCards.find(c => c.title === title) || null;
-}
+| | |
+|---|---|
+| **Parameters** | `type` `string` — case-sensitive |
+| **Returns** | `array` — array of matching story card objects, empty array if none found |
 
-/// Deletes a story card by exact title match.
-// Returns true on success, false if not found.
-F90.deleteCard = function(title)
-{
-  const idx = storyCards.findIndex(c => c.title === title);
-  if (idx === -1) return false;
+**AID reserved types:** `"Character"`, `"Class"`, `"Race"`, `"Location"`, `"Faction"`
 
-  storyCards.splice(idx, 1);
-  return true;
-}
+Scripts and users may define their own types freely.
 
-// Returns all story cards matching the given type. Case-sensitive.
-F90.getCardsByType = function(type)
-{
-  return storyCards.filter(c => c.type === type);
-}
+---
 
-// ============================================
-// F90 API - Module Runtime
-// ============================================
+## Notifications
 
-F90._modules = [];
+### `F90.notify(message)`
+Queues a message to be shown to the player. Messages are flushed at the end of the output hook automatically by `F90.run()`.
 
-// Registers a module for execution. Priority is optional, per hook, numeric.
-// Lower number runs earlier. Unspecified hooks fall to registration order.
-// EXAMPLE: F90.registerModule("CSMS", CSMS, { context:0, output: 5 });
-F90.registerModule = function(name, fn, priority)
-{
-  F90._modules.push({
-    name:       name,
-    fn:         fn,
-    priority:   priority || {},
-    order:      F90._modules.length,
-  });
-}
+| | |
+|---|---|
+| **Parameters** | `message` `string` |
+| **Returns** | void |
 
-// Runs all registered modules for the given hook, in priority order.
-// Failures are logged and execution continues for remaining modules.
-F90.run = function(hook)
-{
-  // Helps user to capture the original input text so on one has to do that manually
-  if (hook === "input") F90.captureText();
+---
 
-  const sorted = [...F90._modules].sort((a, b) =>
-  {
-    const aPriority = a.priority[hook];
-    const bPriority = b.priority[hook];
+### `F90.flushNotify()`
+Flushes all queued notifications into text, prepended as a bracketed block. Automatically called by `F90.run()` at the end of the output hook — manual calls are not needed when using the module runtime.
 
-    if (aPriority !== undefined && bPriority !== undefined) return aPriority - bPriority;
-    if (aPriority !== undefined) return -1;
-    if (bPriority !== undefined) return 1;
+| | |
+|---|---|
+| **Parameters** | none |
+| **Returns** | void |
 
-    return a.order - b.order;
-  });
+---
 
-  for (const module of sorted)
-  {
-    try
-    {
-        module.fn(hook);
-    }
-    catch(e)
-    {
-      log(`F90 > run: ${module.name} failed on ${hook} - ${e.message}`);
-    }
-  }
+## Module Runtime
 
-  // Same. F90 API help users to flush notify so they dont have to worry about that and its order and so on
-  if (hook === "output") F90.flushNotify();
-}
+### `F90.registerModule(name, fn, priority?)`
+Registers a module for execution. Modules execute in registration order by default.
 
+| | |
+|---|---|
+| **Parameters** | `name` `string` — module identifier used in log messages |
+| | `fn` `function` — the module's entry point, called with the hook name as its argument |
+| | `priority` `object` *(optional)* — per-hook numeric priority. Lower runs earlier. Unspecified hooks fall to registration order. |
+| **Returns** | void |
 
+**Example:**
+```javascript
+// No priority — runs in registration order
+F90.registerModule("Loadout", Loadout);
 
-// ========================
-// END OF F90 API
-// ========================
+// With priority — runs first in context, last in output
+F90.registerModule("F90Debug", F90Debug, { context: 0, output: 99 });
+```
 
+> **Note:** Registering the same name twice will result in both running. Avoid duplicate registrations.
 
-// ========================
-// ADD YOUR MODULES BELOW
-// Register at the bottom
-// ========================
+---
 
+### `F90.run(hook)`
+Runs all registered modules for the given hook in priority order. Failures are caught and logged — a broken module never stops the others from running.
 
-// Your module code here...
-/* 
-function YourModule(hook)
-{
-  if (hook === "input")
-  {
-    // Input Script
-  }
-  if (hook === "context")
-  {
-    // Context Script
-  }
-  if (hook === "output")
-  {
-    // Output Script
-  }
-}
-*/
+Also handles:
+- Capturing text automatically at the start of `"input"`
+- Flushing notifications automatically at the end of `"output"`
 
-// ========================
-// REGISTER MODULES HERE
-// Always keep this last
-// ========================
+| | |
+|---|---|
+| **Parameters** | `hook` `string` — `"input"`, `"context"`, or `"output"` |
+| **Returns** | void |
 
-// F90.registerModule("YourModule", YourModule);
-// F90.registerModule("Loadout", Loadout);
+**Example — hook files:**
+```javascript
+// Input tab
+F90.run("input");
+const modifier = (text) => { return { text } }
+modifier(text);
 
+// Context tab
+F90.run("context");
+const modifier = (text) => { return { text } }
+modifier(text);
+
+// Output tab
+F90.run("output");
+const modifier = (text) => { return { text } }
+modifier(text);
+```
