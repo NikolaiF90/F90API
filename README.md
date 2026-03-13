@@ -1,3 +1,5 @@
+![F90 API COVER ART](https://github.com/NikolaiF90/F90API/blob/main/Cover_Art_F90API.png)
+
 # F90 API
 **A unified scripting library for AI Dungeon.**
 by PrinceF90
@@ -118,8 +120,6 @@ Click **Save**.
 Click **Play**. Your scripts are now running together.
 
 ---
-
-![F90 API COVER ART](https://github.com/NikolaiF90/F90API/blob/main/Cover_Art_F90API.png)
 
 ## Why
 
