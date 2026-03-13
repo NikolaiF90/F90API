@@ -124,7 +124,7 @@ Adds a character to F90's registry. The first character created is automatically
 
 **Example:**
 ```javascript
-F90.createCharacter({ name: "Fuzheng", hp: 100 });
+F90.createCharacter({ name: "Smith", hp: 100 });
 ```
 
 ---
