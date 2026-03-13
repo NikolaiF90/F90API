@@ -1,6 +1,6 @@
 # F90 API Reference
 
-All methods live under the global `F90` object. Available in any hook — Input, Context, or Output.
+All methods live under the global `F90` object. Available in any hook - Input, Context, or Output.
 
 ---
 
@@ -18,7 +18,7 @@ All methods live under the global `F90` object. Available in any hook — Input,
 ## Text
 
 ### `F90.captureText()`
-Captures the raw unmodified text at the moment of the call. Automatically called by `F90.run()` at the start of the input hook — manual calls are not needed when using the module runtime.
+Captures the raw unmodified text at the moment of the call. Automatically called by `F90.run()` at the start of the input hook - manual calls are not needed when using the module runtime.
 
 | | |
 |---|---|
@@ -35,7 +35,7 @@ Returns the text captured by the most recent `F90.captureText()` call.
 | | |
 |---|---|
 | **Parameters** | none |
-| **Returns** | `string` — captured text, or `""` if nothing has been captured yet |
+| **Returns** | `string` - captured text, or `""` if nothing has been captured yet |
 
 ---
 
@@ -75,14 +75,14 @@ Appends content to `frontMemory` for AI context injection.
 Parses AID's player input into structured parts. Reads from the current text snapshot automatically.
 
 Handles all three AID input formats:
-- **DO** — `> You action here.`
-- **SAY** — `> You say, "whatever you typed."`
-- **STORY** — `whatever you typed.` (no prepend)
+- **DO** - `> You action here.`
+- **SAY** - `> You say, "whatever you typed."`
+- **STORY** - `whatever you typed.` (no prepend)
 
 | | |
 |---|---|
 | **Parameters** | none |
-| **Returns** | `object` — `{ original, clean, prepend }` |
+| **Returns** | `object` - `{ original, clean, prepend }` |
 
 **Return shape:**
 ```javascript
@@ -108,7 +108,7 @@ Handles all three AID input formats:
 { original: "The kingdom falls at dawn.", clean: "The kingdom falls at dawn", prepend: null }
 ```
 
-> ⚠️ **Untested** — pending real usage in CSMS.
+> ⚠️ **Untested** - pending real usage in CSMS.
 
 ---
 
@@ -119,8 +119,8 @@ Adds a character to F90's registry. The first character created is automatically
 
 | | |
 |---|---|
-| **Parameters** | `character` `object` — must include a `name` property. All other properties are caller-defined. |
-| **Returns** | `boolean` — `true` on success, `false` if name is missing or character already exists |
+| **Parameters** | `character` `object` - must include a `name` property. All other properties are caller-defined. |
+| **Returns** | `boolean` - `true` on success, `false` if name is missing or character already exists |
 
 **Example:**
 ```javascript
@@ -135,7 +135,7 @@ Removes a character from F90's registry by name.
 | | |
 |---|---|
 | **Parameters** | `name` `string` |
-| **Returns** | `boolean` — `true` on success, `false` if not found |
+| **Returns** | `boolean` - `true` on success, `false` if not found |
 
 ---
 
@@ -145,19 +145,19 @@ Finds a character in F90's registry by name. Case-insensitive.
 | | |
 |---|---|
 | **Parameters** | `name` `string` |
-| **Returns** | `object` — character object, or `null` if not found |
+| **Returns** | `object` - character object, or `null` if not found |
 
 ---
 
 ### `F90.getCaller()`
 Parses AID's `> Name` input format and returns the caller's name as a plain string.
 
-Returns whatever follows `>`. Does not resolve banned names or validate against the registry — that is the caller's responsibility.
+Returns whatever follows `>`. Does not resolve banned names or validate against the registry - that is the caller's responsibility.
 
 | | |
 |---|---|
 | **Parameters** | none |
-| **Returns** | `string` — caller name, or `null` if no match |
+| **Returns** | `string` - caller name, or `null` if no match |
 
 > **Tip:** In singleplayer, AID prepends `> You`. In multiplayer, it prepends `> CharacterName`. `getCaller()` returns whichever name follows `>` without branching.
 
@@ -166,12 +166,12 @@ Returns whatever follows `>`. Does not resolve banned names or validate against 
 ### `F90.getCallerCharacter()`
 Returns the full character object of the active caller.
 
-In singleplayer, `> You` is a banned name — falls back to the player character automatically. In multiplayer, resolves the caller by name against the registry.
+In singleplayer, `> You` is a banned name - falls back to the player character automatically. In multiplayer, resolves the caller by name against the registry.
 
 | | |
 |---|---|
 | **Parameters** | none |
-| **Returns** | `object` — character object, or `null` if not found |
+| **Returns** | `object` - character object, or `null` if not found |
 
 ---
 
@@ -192,8 +192,8 @@ Returns a story card by exact title match.
 
 | | |
 |---|---|
-| **Parameters** | `title` `string` — case-sensitive |
-| **Returns** | `object` — story card object, or `null` if not found |
+| **Parameters** | `title` `string` - case-sensitive |
+| **Returns** | `object` - story card object, or `null` if not found |
 
 ---
 
@@ -202,8 +202,8 @@ Deletes a story card by exact title match.
 
 | | |
 |---|---|
-| **Parameters** | `title` `string` — case-sensitive |
-| **Returns** | `boolean` — `true` on success, `false` if not found |
+| **Parameters** | `title` `string` - case-sensitive |
+| **Returns** | `boolean` - `true` on success, `false` if not found |
 
 ---
 
@@ -212,8 +212,8 @@ Returns all story cards matching the given type.
 
 | | |
 |---|---|
-| **Parameters** | `type` `string` — case-sensitive |
-| **Returns** | `array` — array of matching story card objects, empty array if none found |
+| **Parameters** | `type` `string` - case-sensitive |
+| **Returns** | `array` - array of matching story card objects, empty array if none found |
 
 **AID reserved types:** `"Character"`, `"Class"`, `"Race"`, `"Location"`, `"Faction"`
 
@@ -234,7 +234,7 @@ Queues a message to be shown to the player. Messages are flushed at the end of t
 ---
 
 ### `F90.flushNotify()`
-Flushes all queued notifications into text, prepended as a bracketed block. Automatically called by `F90.run()` at the end of the output hook — manual calls are not needed when using the module runtime.
+Flushes all queued notifications into text, prepended as a bracketed block. Automatically called by `F90.run()` at the end of the output hook - manual calls are not needed when using the module runtime.
 
 | | |
 |---|---|
@@ -250,17 +250,17 @@ Registers a module for execution. Modules execute in registration order by defau
 
 | | |
 |---|---|
-| **Parameters** | `name` `string` — module identifier used in log messages |
-| | `fn` `function` — the module's entry point, called with the hook name as its argument |
-| | `priority` `object` *(optional)* — per-hook numeric priority. Lower runs earlier. Unspecified hooks fall to registration order. |
+| **Parameters** | `name` `string` - module identifier used in log messages |
+| | `fn` `function` - the module's entry point, called with the hook name as its argument |
+| | `priority` `object` *(optional)* - per-hook numeric priority. Lower runs earlier. Unspecified hooks fall to registration order. |
 | **Returns** | void |
 
 **Example:**
 ```javascript
-// No priority — runs in registration order
+// No priority - runs in registration order
 F90.registerModule("Loadout", Loadout);
 
-// With priority — runs first in context, last in output
+// With priority - runs first in context, last in output
 F90.registerModule("F90Debug", F90Debug, { context: 0, output: 99 });
 ```
 
@@ -269,7 +269,7 @@ F90.registerModule("F90Debug", F90Debug, { context: 0, output: 99 });
 ---
 
 ### `F90.run(hook)`
-Runs all registered modules for the given hook in priority order. Failures are caught and logged — a broken module never stops the others from running.
+Runs all registered modules for the given hook in priority order. Failures are caught and logged - a broken module never stops the others from running.
 
 Also handles:
 - Capturing text automatically at the start of `"input"`
@@ -277,10 +277,10 @@ Also handles:
 
 | | |
 |---|---|
-| **Parameters** | `hook` `string` — `"input"`, `"context"`, or `"output"` |
+| **Parameters** | `hook` `string` - `"input"`, `"context"`, or `"output"` |
 | **Returns** | void |
 
-**Example — hook files:**
+**Example - hook files:**
 ```javascript
 // Input tab
 F90.run("input");
