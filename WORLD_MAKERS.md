@@ -142,7 +142,7 @@ Your Input tab looks something like this:
 ```javascript
 // This is an example — yours will have a different function name
 CSMS("input");
-InnerSelf("Input);
+InnerSelf("input");
 ```
 
 Your Context and Output tabs look the same, just with `"context"` and `"output"` instead.
