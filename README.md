@@ -40,8 +40,8 @@ Every method on F90 API was proven necessary by real scripts before being added.
 
 ## Credits
 
-- **PrinceF90** — created F90 API
-- **LewdLeah** — hook terminology convention, quick start template, user-friendly guide feedback
+- **[PrinceF90](https://github.com/NikolaiF90)** — created F90 API
+- **[LewdLeah](https://github.com/LewdLeah)** — hook terminology convention, quick start template, user-friendly guide feedback
 - **LeCragin** — user-friendly guide feedback  
 - **Vorsipellis** — world maker / developer audience split, community outreach for F90 API adoption
 
