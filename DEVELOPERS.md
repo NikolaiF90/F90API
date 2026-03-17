@@ -59,7 +59,38 @@ What users install is just your script file — no F90 API, no hook tab contents
 
 ---
 
-## Porting your existing script
+## What to ship
+
+When you're ready to distribute your script, what you ship is **only your module code** — not F90 API, not the hook tab contents.
+
+F90 API's library file is divided into clear sections marked by comments. Here's what each one means for you:
+
+```
+// ========================
+// END OF F90 API
+// ========================
+```
+Everything above this line is F90 API. It belongs to the user's installation. Never include it in your script file.
+
+```
+// ========================
+// ADD YOUR MODULES BELOW
+// ========================
+```
+Everything between here and the registration section is your script. This is what you copy out and ship as your library file.
+
+```
+// ========================
+// REGISTER MODULES HERE
+// ========================
+```
+The registration line at the bottom. Include this at the end of your script file so users know exactly what to copy into their own registration section.
+
+So your shipped file contains exactly: your module code, plus the registration line at the bottom. Nothing else.
+
+---
+
+
 
 Already have a script and want to make it compatible? The porting patterns are documented in the [World Maker Guide](WORLD_MAKERS.md#porting-scripts). The patterns are the same — you're just doing it to your own code instead of someone else's.
 
